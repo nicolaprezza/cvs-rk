@@ -8,15 +8,19 @@ using namespace cvs_rk;
 
 int main(int argc,char** argv) {
 
-	if(argc != 2){
+	if(argc != 3){
 
 		cout << "Usage:	" << endl;
-		cout <<	"  cvs-rk file.txt" << endl;
-		cout << "where 'file.txt' contains a M x L ASCII matrix" <<endl;
+		cout <<	"  cvs-rk <file.txt> <P>" << endl;
+		cout << "where 'file.txt' contains a M x L ASCII matrix and 0<P<1 is " << endl;
+		cout <<	"the probability of selecting a column in the initial solution" <<endl;
 
 		exit(0);
 
 	}
+
+
+	double P = atof(argv[2]);
 
 	std::ifstream infile(argv[1]);
 
@@ -37,10 +41,14 @@ int main(int argc,char** argv) {
 	auto A = local_search(rows);
 
 	srand(time(NULL));
-	auto B = vector<bool>(nr_rows);
+	auto B = vector<bool>(nr_rows,true);
 
-	for(ulint i=0;i<B.size();++i) B[i] = rand()%2;
+	for(ulint i=0;i<B.size();++i){
 
-	A.run(B);
+		B[i] = ((double)rand()/RAND_MAX) < P;
+
+	}
+
+	A.run_fixed_n(B);
 
 }
