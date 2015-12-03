@@ -83,7 +83,7 @@ public:
 
 private:
 
-	mod_int_t sum(vector<mod_int_t> v){
+	mod_int_t sum(vector<mod_int_t>& v){
 
 		mod_int_t s=0;
 

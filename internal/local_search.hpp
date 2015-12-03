@@ -177,6 +177,7 @@ public:
 			cout << "Current solution: " << endl;
 			for(auto b:C.first) cout << b;cout<<endl;
 			cout << "H(K) = " << C_HK << endl;
+			cout << "n = " << psum(C.first) << endl;
 
 			if(local_max){
 
@@ -194,6 +195,12 @@ public:
 	}
 
 private:
+
+	ulint psum(vector<bool>& B){
+		ulint ps=0;
+		for(auto b:B) ps += b;
+		return ps;
+	}
 
 	//matrix of characters
 	matrix_t M;

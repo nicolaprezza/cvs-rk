@@ -58,7 +58,7 @@ public:
 	}
 
 	//i-th row as string
-	string row(ulint i){
+	string& row(ulint i){
 
 		assert(i<rows.size());
 		return rows[i];
@@ -72,7 +72,7 @@ public:
 	* where s = 256 is the alphabet size
 	*
 	*/
-	vector<mod_int_t> column(ulint i){
+	vector<mod_int_t>& column(ulint i){
 
 		assert(i<columns.size());
 		return columns[i];
