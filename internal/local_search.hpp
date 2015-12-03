@@ -261,26 +261,17 @@ public:
 						auto B = C.first;
 						candidate_t new_C;		//neighbor
 
-						bool new_solution = false;
-
 						B[j0] = true;
 						B[j1] = false;
 
 						if(explored.find(B) == explored.end()){
 
-							new_solution = true;
+							explored.insert(B);
 
 							new_C = {
 									B,
 									(C.second + M.column(j0))-M.column(j1)
 							};
-
-						}
-
-						//if new candidate has not been tried yet
-						if(new_solution){
-
-							explored.insert(B);
 
 							double new_HK = HK<matrix_t::mod_int_t>(new_C.second);
 
@@ -310,7 +301,7 @@ public:
 				C_HK = best_HK;
 			}
 
-			cout << "Current solution: " << endl;
+			cout << "Current best solution: " << endl;
 			for(auto b:C.first) cout << b;cout<<endl;
 			cout << "H(K) = " << C_HK << endl;
 			cout << "n = " << psum(C.first) << endl;

@@ -111,17 +111,19 @@ private:
  * component-wise sum between vectors of modular integers
  */
 template<ulint q>
-std::vector<mod_int<q> > operator+(std::vector<mod_int<q> > a, std::vector<mod_int<q> > b){
+std::vector<mod_int<q> > operator+(std::vector<mod_int<q> >& a, std::vector<mod_int<q> >& b){
 
 	assert(a.size() == b.size());
 
     auto result = std::vector<mod_int<q> >(a.size());
 
-    std::transform(	a.begin(),
+    for(ulint i=0;i<a.size();++i) result[i] = a[i] + b[i];
+
+    /*std::transform(	a.begin(),
     				a.end(),
 					b.begin(),
 					result.begin(),
-					[](mod_int<q>& a, mod_int<q>& b) { return a+b; });
+					[](mod_int<q>& a, mod_int<q>& b) { return a+b; });*/
 
     return result;
 }
@@ -136,11 +138,13 @@ std::vector<mod_int<q> > operator-(std::vector<mod_int<q> > a, std::vector<mod_i
 
     auto result = std::vector<mod_int<q> >(a.size());
 
-    std::transform(	a.begin(),
+    for(ulint i=0;i<a.size();++i) result[i] = a[i] - b[i];
+
+    /*std::transform(	a.begin(),
     				a.end(),
 					b.begin(),
 					result.begin(),
-					[](mod_int<q>& a, mod_int<q>& b) { return a-b; });
+					[](mod_int<q>& a, mod_int<q>& b) { return a-b; });*/
 
     return result;
 }
