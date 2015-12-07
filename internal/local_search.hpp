@@ -17,6 +17,14 @@ class local_search{
 
 public:
 
+	struct search_result{
+
+		vector<bool> B;
+		double HK;
+		int distinct_rows;
+
+	};
+
 	typedef pair<vector<bool>, vector<matrix_t::mod_int_t> > candidate_t;
 
 	local_search(){}
@@ -209,7 +217,7 @@ public:
 	 * run local search keeping n fixed
 	 * default: all columns (vector <111...1>)
 	 */
-	void run_fixed_n(vector<bool> initial_solution){
+	search_result run_fixed_n(vector<bool> initial_solution){
 
 		auto hashed_vec = M.hashed_rows();
 
@@ -301,10 +309,7 @@ public:
 				C_HK = best_HK;
 			}
 
-			cout << "Current best solution: " << endl;
-			for(auto b:C.first) cout << b;cout<<endl;
-			cout << "H(K) = " << C_HK << endl;
-			cout << "n = " << psum(C.first) << endl;
+			cout << "Current best solution: H(K) = " << C_HK << endl;
 
 			if(local_max){
 
@@ -314,18 +319,25 @@ public:
 
 		}
 
-		cout << endl;
+		/*cout << endl;
 		cout << "Solution found:" << endl;
 		for(auto b:C.first) cout << b;cout<<endl;
 		cout << "H(K) = " << C_HK << endl;
-		cout << "n = " << psum(C.first) << endl;
+		cout << "n = " << psum(C.first) << endl;*/
 
-		auto m_k = get_counts_mk<matrix_t::mod_int_t>(C.second);
+		//auto m_k = get_counts_mk<matrix_t::mod_int_t>(C.second);
 
-		cout << endl << "k\tm_k" << endl;
-		ulint i=0;
+		//cout << endl << "k\tm_k" << endl;
+		//ulint i=0;
 
-		for(auto c:m_k)	if(i++ > 0) cout << i-1 << "\t" << c << endl;
+		//for(auto c:m_k)	if(i++ > 0) cout << i-1 << "\t" << c << endl;
+
+		auto comp = [](matrix_t::mod_int_t x, matrix_t::mod_int_t y){ return x < y; };
+		std::set<matrix_t::mod_int_t,decltype(comp)> distinct_rows(comp);
+
+		for(auto c:C.second) distinct_rows.insert(c);
+
+		return {C.first, C_HK, int(distinct_rows.size())};
 
 	}
 

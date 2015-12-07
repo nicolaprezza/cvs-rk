@@ -16,6 +16,5 @@ int main(int argc,char** argv) {
 	while (std::getline(infile, line)) rows.push_back(line);
 
 	auto A = local_search(rows);
-	A.run();
 
 }
