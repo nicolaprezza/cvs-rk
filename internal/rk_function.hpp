@@ -75,8 +75,6 @@ public:
 
 		}
 
-		assert(H == sum(to_mod_vector(S)));
-
 		return H;
 
 	}

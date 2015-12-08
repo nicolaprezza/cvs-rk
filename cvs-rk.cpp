@@ -75,17 +75,53 @@ int main(int argc,char** argv) {
 
 	auto A = local_search(rows);
 
+	//number of times a position is selected as critical
+	auto critical_var_counts = vector<ulint>(nr_columns);
+
+	double mean_HK=0;
+	double mean_H=0;
+
+	auto hks = vector<double>(rep);
+	auto hs = vector<double>(rep);
+
 	//repeat rep times
 	for(ulint r = 0;r<rep;++r){
 
 		auto B = rand_vec(nr_columns,n);
 		auto result = A.run_fixed_n(B);
 
+		ulint j=0;
+		for(auto b:result.B) critical_var_counts[j++] += b;
+
+		mean_HK += result.HK;
+		mean_H += result.H;
+
+		hks[r] = result.HK;
+		hs[r] = result.H;
+
 		cout<<endl;
 		for(auto b:result.B) cout << b;cout<<endl;
-		cout << "H(K) = " << result.HK << endl;
+		cout << "Counts entropy: H(K) = " << result.HK << endl;
+		cout << "Set entropy: H(S) = " << result.H << endl;
 		cout << "distinct rows = " << result.distinct_rows << endl;
 
 	}
+
+	mean_HK /= rep;
+	mean_H /= rep;
+
+	double var_hk=0;
+	for(auto h:hks) var_hk += pow(h-mean_HK,2);
+
+	double var_h=0;
+	for(auto h:hs) var_h += pow(h-mean_H,2);
+
+
+	cout << endl << "Search terminated. Results:" << endl;
+	cout << "Mean H(K) over " << rep << " runs: " << mean_HK << ". Variance = " << var_hk << endl;
+	cout << "Mean H(S) over " << rep << " runs: " << mean_H << ". Variance = " << var_h << endl;
+
+	cout << endl << "For each matrix column, number of times the column has been selected:" << endl;
+	for(auto c:critical_var_counts) cout << c << "\t";
 
 }

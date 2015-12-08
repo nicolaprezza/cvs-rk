@@ -116,11 +116,48 @@ double HK(vector<T> S){
 
 	for(ulint k=0;k<m_k.size();++k){
 
-		if(m_k[k]>0) Hk -= (double(k*m_k[k])/M) * log2(double(k*m_k[k])/M);
+		if(m_k[k]>0) Hk -= (double(k*m_k[k])/M) * log(double(k*m_k[k])/M);
 
 	}
 
 	return Hk;
+
+}
+
+/*
+ * input: vector S of objects having an operator < defined
+ * output: entropy of S
+ */
+template<typename T>
+double H(vector<T> S){
+
+	double H = 0;
+
+	std::sort(S.begin(),S.end());
+
+	ulint k = 0;
+
+	for(ulint i = 0;i<S.size();++i){
+
+		if( i>0 && ( S[i-1] < S[i] ) ){
+
+			assert(k>0);
+			assert(S.size()>0);
+
+			H -= ( (double(k)/S.size()) * log(double(k)/S.size()) );
+			k = 1;
+
+		}else{
+
+			k++;
+
+		}
+
+	}
+
+	H -= ( (double(k)/S.size()) * log(double(k)/S.size()) );
+
+	return H;
 
 }
 
