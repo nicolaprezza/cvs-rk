@@ -14,7 +14,7 @@ Given an input text file containing a matrix A of ASCII characters of size M x L
 
 ### Compile
 
-The library has been tested under linux using gcc 4.9.2/5.2.1 Use cmake to generate the Makefile:
+The library has been tested under linux using gcc 4.9.2/5.2.1.
 
 firstly, create and enter a build/ directory
 
