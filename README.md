@@ -14,13 +14,13 @@ Given an input text file containing a matrix A of ASCII characters of size M x L
 
 ### Compile
 
-The library has been tested under linux using gcc 4.9.2. Use cmake to generate the Makefile:
+The library has been tested under linux using gcc 4.9.2/5.2.1 Use cmake to generate the Makefile:
 
 firstly, create and enter a build/ directory
 
 > mkdir build; cd build
 
-Then, launch cmake as (default build type is release):
+Use cmake to generate the makefile (default build type is release):
 
 > cmake ..
 
@@ -38,4 +38,10 @@ The above command creates the executables in the build directory.
 
 from the build/ directory, execute
 
-> ./cvs.rk ../example_input.txt
+> ./cvs-rk ../example_input.txt 5 2
+
+The above command executes 2 times the local search strategy on the matrix 'example_input.txt', always keeping the number n of selected rows fixed at n=5.
+
+For more details, run
+
+> ./cvs-rk
