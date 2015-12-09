@@ -10,7 +10,7 @@ Given an input text file containing a matrix A of ASCII characters of size M x L
 
 ### Download
 
-> git clone github.com/nicolaprezza/cvs-rk
+> git clone https://github.com/nicolaprezza/cvs-rk
 
 ### Compile
 
