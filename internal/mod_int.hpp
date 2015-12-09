@@ -132,7 +132,7 @@ std::vector<mod_int<q> > operator+(std::vector<mod_int<q> >& a, std::vector<mod_
  * component-wise difference between vectors of modular integers
  */
 template<ulint q>
-std::vector<mod_int<q> > operator-(std::vector<mod_int<q> > a, std::vector<mod_int<q> > b){
+std::vector<mod_int<q> > operator-(std::vector<mod_int<q> >& a, std::vector<mod_int<q> >& b){
 
 	assert(a.size() == b.size());
 

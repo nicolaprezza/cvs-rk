@@ -99,9 +99,11 @@ public:
 
 							explored.insert(B);
 
+							auto sum = C.second + M.column(j0);
+
 							new_C = {
 									B,
-									(C.second + M.column(j0))-M.column(j1)
+									sum-M.column(j1)
 							};
 
 							double new_HK = HK<matrix_t::mod_int_t>(new_C.second);
