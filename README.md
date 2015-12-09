@@ -40,7 +40,7 @@ from the build/ directory, execute
 
 > ./cvs-rk ../example_input.txt 5 2
 
-The above command executes 2 times the local search strategy on the matrix 'example_input.txt', always keeping the number n of selected rows fixed at n=5.
+The above command executes 2 times the local search strategy on the matrix 'example_input.txt', always keeping the number n of selected columns fixed at n=5.
 
 For more details, run
 
