@@ -67,22 +67,9 @@ public:
 	//multiply two modular integers
 	mod_int operator*(mod_int b){
 
-		ulint l1 = this->val >> 32;
-		ulint l2 = (this->val << 32) >> 32;
+		auto m = __uint128_t(this->val)*__uint128_t(b.val);
 
-		ulint r1 = b.val >> 32;
-		ulint r2 = (b.val << 32) >> 32;
-
-		ulint l1_r1 = mult_pow_2(l1*r1,64);
-		ulint l1_r2 = mult_pow_2(l1*r2,32);
-		ulint l2_r1 = mult_pow_2(l2*r1,32);
-		ulint l2_r2 = (l2*r2)%q;
-
-		ulint res = (l1_r1 + l1_r2)%q;
-		res = (res + l2_r1)%q;
-		res = (res + l2_r2)%q;
-
-		return {res};
+		return {ulint(m)%q};
 
 	}
 
@@ -91,17 +78,6 @@ public:
 	}
 
 private:
-
-	//return x*2^i mod q
-	ulint mult_pow_2(ulint x,uint i){
-
-		x = x%q;
-
-		for(uint j=0;j<i;++j) x = (x<<1)%q;
-
-		return x;
-
-	}
 
 	ulint val;
 
