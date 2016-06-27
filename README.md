@@ -38,7 +38,7 @@ The above command creates the executables in the build directory.
 
 from the build/ directory, execute
 
-> ./cvs-rk ../example_input.txt 5 2
+> ./cvs-rk -i ../example_input.txt -n 5 -r 2
 
 The above command executes 2 times the local search strategy on the matrix 'example_input.txt', always keeping the number n of selected columns fixed at n=5.
 
