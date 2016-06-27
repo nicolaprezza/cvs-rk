@@ -6,6 +6,12 @@
 
 using namespace cvs_rk;
 
+string infile;
+int n=0;
+int rep=0;
+bool exhaustive=false;
+string fixed_cols;
+
 /*
  * generate uniformly a random bit-vector of length L with
  * n bits set
@@ -31,36 +37,93 @@ vector<bool> rand_vec(int L, int n){
 
 }
 
+void help(){
+
+	cout << "Usage:	" << endl;
+	cout <<	"  cvs-rk [OPTIONS]" << endl;
+
+	cout << "  MANDATORY OPTIONS:" << endl;
+	cout << "    -i <file.txt> input file containing a M x L ASCII matrix "<<endl;
+	cout << "                  stored row-wise" << endl;
+	cout <<	"    -n <n> is the number of bits set in the initial solution" <<endl;
+	cout <<	"    -r <rep> is the number of repetitions of the search algorithm." <<endl;
+	cout <<	"       At each repetition, the search starts from a random" <<endl;
+	cout <<	"       bitvector with n bits set." <<endl;
+
+	cout << "  OTHER OPTIONS:" << endl;
+	cout << "    -e exhaustive neighbor search: pick the best among all L(N-L)" << endl;
+	cout <<	"       neighbors. Default: false (random search: pick the first" <<endl;
+	cout <<	"       neighbor that improves the counts entropy). " <<endl;
+
+	//cout <<	"    -f <c1,c2,c3,...,cm> string specifying which columns to keep" <<endl;
+	//cout <<	"       fixed during search" <<endl;
+	exit(0);
+
+}
+
+void parse_args(int & i,int tot_args, char** argv){
+
+	if(i>=tot_args) help();
+
+	//read option
+	string op(argv[i++]);
+
+	if(op.compare("-i")==0){
+
+		//read argument
+		infile = string(argv[i++]);
+
+	}
+	if(op.compare("-n")==0){
+
+		//read argument
+		n = atoi(argv[i++]);
+
+	}
+	if(op.compare("-r")==0){
+
+		//read argument
+		rep = atoi(argv[i++]);
+
+	}
+	if(op.compare("-e")==0){
+
+		//read argument
+		exhaustive = true;
+
+	}
+	/*if(op.compare("-f")==0){
+
+		//read argument
+		infile = string(argv[i++]);
+
+	}*/
+
+
+}
+
 int main(int argc,char** argv) {
 
 	srand(time(NULL));
 
-	if(argc != 4){
+	int i=1;
 
-		cout << "Usage:	" << endl;
-		cout <<	"  cvs-rk <file.txt> <n> <rep>" << endl;
-		cout << "where:" << endl;
-		cout << "  <file.txt> contains a M x L ASCII matrix stored row-wise" << endl;
-		cout <<	"  <n> is the number of bits set in the initial solution" <<endl;
-		cout <<	"  <rep> is the number of repetitions of the search algorithm." <<endl;
-		cout <<	"        At each repetition, the search starts from a random" <<endl;
-		cout <<	"        bitvector with n bits set." <<endl;
-		exit(0);
+	if(argc<=1) help();
 
-	}
+	while(i<argc) parse_args(i,argc,argv);
 
+	if(infile.compare("")==0 or n == 0 or rep == 0) help();
 
-	int n = atoi(argv[2]);
-	int rep = atoi(argv[3]);
-
-	std::ifstream infile(argv[1]);
+	cout << "input file: " << infile << endl;
 
 	vector<string> rows;
 
 	std::string line;
 	int nr_columns=-1;
 
-	while (std::getline(infile, line)){
+	std::ifstream infile_f(infile);
+
+	while (std::getline(infile_f, line)){
 
 		assert(nr_columns<0 or nr_columns == line.length());
 
@@ -88,7 +151,13 @@ int main(int argc,char** argv) {
 	for(ulint r = 0;r<rep;++r){
 
 		auto B = rand_vec(nr_columns,n);
-		auto result = A.run_fixed_n(B);
+
+		local_search::search_result result;
+
+		if(exhaustive)
+			result = A.run_fixed_n_all_neighbors(B);
+		else
+			result = A.run_fixed_n_first_neighbor(B);
 
 		ulint j=0;
 		for(auto b:result.B) critical_var_counts[j++] += b;

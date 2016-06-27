@@ -67,9 +67,10 @@ public:
 	//multiply two modular integers
 	mod_int operator*(mod_int b){
 
-		auto m = __uint128_t(this->val)*__uint128_t(b.val);
+		auto m = __uint128_t(this->val%q)*__uint128_t(b.val%q);
+		m = m%q;
 
-		return {ulint(m)%q};
+		return {ulint(m)};
 
 	}
 

@@ -10,6 +10,9 @@
 
 #include <includes.hpp>
 #include <matrix.hpp>
+#include <map>
+
+using namespace std;
 
 namespace cvs_rk{
 
@@ -39,8 +42,11 @@ public:
 	/*
 	 * run local search keeping n fixed
 	 * default: all columns (vector <111...1>)
+	 *
+	 * all O(L^2) neighbors are explored
+	 *
 	 */
-	search_result run_fixed_n(vector<bool> initial_solution){
+	search_result run_fixed_n_all_neighbors(vector<bool> initial_solution){
 
 		auto hashed_vec = M.hashed_rows();
 
@@ -99,13 +105,16 @@ public:
 
 							explored.insert(B);
 
-							auto sum = C.second + M.column(j0);
+							auto sum = C.second + M.column(j0);	//sum j0-th column
+							auto new_vec = sum-M.column(j1);	//subtract j1-th column
 
+							//new candidate
 							new_C = {
 									B,
-									sum-M.column(j1)
+									new_vec
 							};
 
+							//compute counts entropy
 							double new_HK = HK<matrix_t::mod_int_t>(new_C.second);
 
 							//cout << new_HK << endl;
@@ -137,6 +146,176 @@ public:
 			cout << "Current best solution: H(K) = " << C_HK << endl;
 
 			if(local_max){
+
+				cout << "Local maximum reached. Search terminated." << endl;
+
+			}
+
+		}
+
+		auto comp = [](matrix_t::mod_int_t x, matrix_t::mod_int_t y){ return x < y; };
+		std::set<matrix_t::mod_int_t,decltype(comp)> distinct_rows(comp);
+
+		for(auto c:C.second) distinct_rows.insert(c);
+
+		return {C.first, C_HK, H<matrix_t::mod_int_t>(C.second), int(distinct_rows.size())};
+
+	}
+
+	/*
+	 * run local search keeping n fixed
+	 * default: all columns (vector <111...1>)
+	 *
+	 * we pick random neighbors until we find one that
+	 * improves the counts entropy
+	 *
+	 */
+	search_result run_fixed_n_first_neighbor(vector<bool> initial_solution){
+
+		std::srand ( time(NULL) );
+
+		auto hashed_vec = M.hashed_rows();
+
+		for(ulint i=0;i<M.n_columns();++i){
+
+			//remove column from hashed vector
+			if(not initial_solution[i]){
+
+				hashed_vec = hashed_vec - M.column(i);
+
+			}
+
+		}
+
+		candidate_t C = {
+
+				initial_solution,
+				hashed_vec
+
+		};
+
+		//to avoid loops, in explored we keep all already explored bitvectors
+		explored.insert(C.first);
+
+		//best H(K): best entropy found up to now
+		double C_HK = HK<matrix_t::mod_int_t>(C.second);
+
+		//we stop search when eaither we found a neighbor that improves
+		//the entropy OR we visited all neighbors (local maximum found)
+		bool stop_search = false;
+
+		while(not stop_search){
+
+			stop_search = true;
+
+			auto bitvector = C.first;
+
+			//fill a vector with positions of 1's
+			vector<int> ones;
+			vector<int> zeros;
+			{
+				int i=0;
+				for(auto b:bitvector)
+					if(b)
+						ones.push_back(i++);
+					else
+						zeros.push_back(i++);
+			}
+
+			//this map maps the position of a 1 to a
+			//pair <N,vec>, where:
+			//vec is a random permutation of the positions of the 0's
+			//N is how many elements we have left to extract from vec
+			//at the beginning, the map is empty. Every time we query
+			//an empty bucket ones_to_zeros[x], we set
+			//ones_to_zeros[x] = <zeros.size(),random_shuffle(zeros)>
+			//if we extracted all possible elements from ones_to_zeros[x],
+			//then we remove x from ones.
+			std::map<int, pair<int,vector<int> > > ones_to_zeros;
+
+			//do we have to continue visiting neighbors?
+			bool continue_visit = true;
+
+			int n_nb=0;//number of visited neighbors
+
+			while(continue_visit){
+
+				//pick a random 1 position
+				int rand_pos = rand()%ones.size();
+				int one_pos = ones[rand_pos];
+
+				//we haven't yet created the permutation of 0's. create it.
+				if(ones_to_zeros[one_pos].second.size()==0){
+
+					std::random_shuffle(zeros.begin(),zeros.end());
+
+					ones_to_zeros[one_pos] = { zeros.size(), zeros };
+
+				}
+
+				//now ones_to_zeros[one_pos] contains a proper pair <N, vec>
+
+				assert(ones_to_zeros[one_pos].first>0);
+				int zero_pos = ones_to_zeros[one_pos].second[ zeros.size()-ones_to_zeros[one_pos].first-1 ];
+
+				ones_to_zeros[one_pos].first--;
+
+				//if no more elements to extract, delete one_pos from ones
+				if(ones_to_zeros[one_pos].first==0) ones.erase(ones.begin() + rand_pos);
+
+				//now we have a pair <one_pos, zero_pos> of positions: compute new candidate
+
+				auto B = C.first;		//bitvector of neighbor
+				candidate_t neighbor_C;		//neighbor
+
+				B[zero_pos] = true;		//flip bits
+				B[one_pos] = false;
+
+				if(explored.find(B) == explored.end()){
+
+					explored.insert(B);
+
+					auto sum = C.second + M.column(zero_pos);	//sum zero_pos-th column
+					auto new_vec = sum-M.column(one_pos);	//subtract one_pos-th column
+
+					//new candidate
+					neighbor_C = {
+							B,
+							new_vec
+					};
+
+					//compute counts entropy
+					double neighbor_HK = HK<matrix_t::mod_int_t>(neighbor_C.second);
+
+					//cout << new_HK << endl;
+
+					if(neighbor_HK>C_HK){
+
+						C_HK = neighbor_HK;
+						C = neighbor_C;
+
+						continue_visit = false;
+
+					}
+
+				}
+
+				//no more neighbors to visit
+				if(ones.size()==0) continue_visit=false;
+
+				n_nb++;
+
+			}
+
+			cout << n_nb <<  " visited neighbors"<<endl;
+
+			//if we visited all neighbors, stop search.
+			//C is the best solution found.
+			stop_search = ones.size()==0;
+
+			cout << "Current best solution: H(K) = " << C_HK << endl;
+
+			if(stop_search){
 
 				cout << "Local maximum reached. Search terminated." << endl;
 
