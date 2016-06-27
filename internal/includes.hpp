@@ -27,6 +27,16 @@ using namespace std;
 
 
 /*
+ * weight of a bitvector
+ */
+int weight(vector<bool> B){
+	int w=0;
+	for(auto b:B) w+=b;
+	return w;
+}
+
+
+/*
  * input: vector S of objects having an operator < defined
  * output: max count k (i.e. number of times a sequence appears repeated)
  */

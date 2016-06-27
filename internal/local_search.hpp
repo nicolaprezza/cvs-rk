@@ -48,6 +48,8 @@ public:
 	 */
 	search_result run_fixed_n_all_neighbors(vector<bool> initial_solution){
 
+		int N = weight(initial_solution);
+
 		auto hashed_vec = M.hashed_rows();
 
 		for(ulint i=0;i<M.n_columns();++i){
@@ -100,6 +102,8 @@ public:
 
 						B[j0] = true;
 						B[j1] = false;
+
+						assert(N==weight(B));
 
 						if(explored.find(B) == explored.end()){
 
@@ -174,6 +178,8 @@ public:
 
 		std::srand ( time(NULL) );
 
+		int N = weight(initial_solution);
+
 		auto hashed_vec = M.hashed_rows();
 
 		for(ulint i=0;i<M.n_columns();++i){
@@ -200,26 +206,25 @@ public:
 		//best H(K): best entropy found up to now
 		double C_HK = HK<matrix_t::mod_int_t>(C.second);
 
-		//we stop search when eaither we found a neighbor that improves
-		//the entropy OR we visited all neighbors (local maximum found)
+		//we stop search when we have visited all neighbors (local maximum found)
 		bool stop_search = false;
 
 		while(not stop_search){
 
-			stop_search = true;
-
-			auto bitvector = C.first;
-
 			//fill a vector with positions of 1's
-			vector<int> ones;
-			vector<int> zeros;
+			vector<uint> ones;
+			vector<uint> zeros;
 			{
-				int i=0;
-				for(auto b:bitvector)
+				uint i=0;
+				for(auto b:C.first)
 					if(b)
 						ones.push_back(i++);
 					else
 						zeros.push_back(i++);
+			}
+
+			for(auto j:zeros){
+				assert(C.first[j]==false);
 			}
 
 			//this map maps the position of a 1 to a
@@ -231,32 +236,49 @@ public:
 			//ones_to_zeros[x] = <zeros.size(),random_shuffle(zeros)>
 			//if we extracted all possible elements from ones_to_zeros[x],
 			//then we remove x from ones.
-			std::map<int, pair<int,vector<int> > > ones_to_zeros;
+			std::map<uint, pair<uint,vector<uint> > > ones_to_zeros;
 
 			//do we have to continue visiting neighbors?
 			bool continue_visit = true;
 
-			int n_nb=0;//number of visited neighbors
+			uint n_nb=0;//number of visited neighbors
 
+			//visit neighbors of C
 			while(continue_visit){
 
 				//pick a random 1 position
-				int rand_pos = rand()%ones.size();
-				int one_pos = ones[rand_pos];
+				uint rand_pos = uint(rand())%ones.size();
+				uint one_pos = ones[rand_pos];
+
+				assert(C.first[one_pos]==true);
 
 				//we haven't yet created the permutation of 0's. create it.
 				if(ones_to_zeros[one_pos].second.size()==0){
 
-					std::random_shuffle(zeros.begin(),zeros.end());
+					auto zeros_copy = zeros;
 
-					ones_to_zeros[one_pos] = { zeros.size(), zeros };
+					std::random_shuffle(zeros_copy.begin(),zeros_copy.end());
+
+					ones_to_zeros[one_pos] = { zeros.size(), zeros_copy };
 
 				}
 
 				//now ones_to_zeros[one_pos] contains a proper pair <N, vec>
 
 				assert(ones_to_zeros[one_pos].first>0);
-				int zero_pos = ones_to_zeros[one_pos].second[ zeros.size()-ones_to_zeros[one_pos].first-1 ];
+				assert(ones_to_zeros[one_pos].first<= zeros.size());
+
+				assert(ones_to_zeros[one_pos].second.size()==zeros.size());
+
+				auto N_index = ones_to_zeros[one_pos].first;
+
+				auto idx = zeros.size()-N_index;
+
+				//cout << idx << "/" <<  ones_to_zeros[one_pos].second.size() << endl;
+				uint zero_pos = ones_to_zeros[one_pos].second[ idx ];
+
+				//cout << "## " << zero_pos << " -> " << C.first[zero_pos] << endl;
+				assert(C.first[zero_pos]==false);
 
 				ones_to_zeros[one_pos].first--;
 
@@ -270,6 +292,8 @@ public:
 
 				B[zero_pos] = true;		//flip bits
 				B[one_pos] = false;
+
+				assert(N==weight(B));
 
 				if(explored.find(B) == explored.end()){
 
@@ -307,7 +331,7 @@ public:
 
 			}
 
-			cout << n_nb <<  " visited neighbors"<<endl;
+			//cout << n_nb <<  " visited neighbors"<<endl;
 
 			//if we visited all neighbors, stop search.
 			//C is the best solution found.

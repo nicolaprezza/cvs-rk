@@ -132,7 +132,7 @@ int main(int argc,char** argv) {
 
 	}
 
-	assert(n<=nr_columns);
+	assert(n<nr_columns);
 
 	cout << "Input matrix size is " << rows.size() << " x " << nr_columns << endl;
 
@@ -151,6 +151,8 @@ int main(int argc,char** argv) {
 	for(ulint r = 0;r<rep;++r){
 
 		auto B = rand_vec(nr_columns,n);
+
+		assert(n==weight(B));
 
 		local_search::search_result result;
 
