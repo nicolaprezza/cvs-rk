@@ -159,7 +159,7 @@ int main(int argc,char** argv) {
 		if(exhaustive)
 			result = A.run_fixed_n_all_neighbors(B);
 		else
-			result = A.run_fixed_n_first_neighbor(B);
+			result = A.run_fixed_n_first_neighbor_eq(B);
 
 		ulint j=0;
 		for(auto b:result.B) critical_var_counts[j++] += b;
